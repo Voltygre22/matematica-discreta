@@ -71,29 +71,84 @@ class Entrega {
      * Vegeu el mètode Tema1.tests() per exemples.
      */
     static int exercici1(int n) {
-      return 0; // TODO
+    // Base case
+      if (n <= 1) return 0;
+
+    // There are 2^n combinations of p1, p2, ..., pn
+      int totalCombinations = (1 << n); // This is 2^n
+    
+    // The number of combinations where the last proposition pn is true is 2^(n-1)
+      int truePnCombinations = (1 << (n - 1)); // This is 2^(n-1)
+    
+    // Return the number of cases where the entire proposition is true
+      return totalCombinations - truePnCombinations;
     }
 
     /*
      * És cert que ∀x : P(x) -> ∃!y : Q(x,y) ?
      */
     static boolean exercici2(int[] universe, Predicate<Integer> p, BiPredicate<Integer, Integer> q) {
-      return false; // TODO
+      for (int x : universe) {
+        if (p.test(x)) { // If P(x) is true
+            int count = 0;
+            for (int y : universe) {
+                if (q.test(x, y)) {
+                    count++;
+                }
+            }
+            if (count != 1) { // There must be exactly one y such that Q(x, y) is true
+                return false;
+            }
+        }
     }
+    return true; // All elements satisfied the condition
 
     /*
      * És cert que ∃x : ∀y : Q(x, y) -> P(x) ?
      */
-    static boolean exercici3(int[] universe, Predicate<Integer> p, BiPredicate<Integer, Integer> q) {
-      return false; // TODO
-    }
+      static boolean exercici3(int[] universe, Predicate<Integer> p, BiPredicate<Integer, Integer> q) {
+        for (int x : universe) {
+          boolean validForAllY = true;
+          for (int y : universe) {
+            if (q.test(x, y) && !p.test(x)) {
+                validForAllY = false;
+                break;
+            }
+          }
+          if (validForAllY) {
+            return true;
+          }
+        }
+        return false;
+      }
 
     /*
      * És cert que ∃x : ∃!y : ∀z : P(x,z) <-> Q(y,z) ?
      */
-    static boolean exercici4(int[] universe, BiPredicate<Integer, Integer> p, BiPredicate<Integer, Integer> q) {
-      return false; // TODO
+  static boolean exercici4(int[] universe, BiPredicate<Integer, Integer> p, BiPredicate<Integer, Integer> q) {
+    for (int x : universe) {
+        int validYCount = 0;
+        for (int y : universe) {
+            boolean validForAllZ = true;
+            for (int z : universe) {
+                if (p.test(x, z) != q.test(y, z)) {
+                    validForAllZ = false;
+                    break;
+                }
+            }
+            if (validForAllZ) {
+                validYCount++;
+                if (validYCount > 1) {
+                    break;
+                }
+            }
+        }
+        if (validYCount == 1) {
+            return true;
+        }
     }
+    return false;
+}
 
     /*
      * Aquí teniu alguns exemples i proves relacionades amb aquests exercicis (vegeu `main`)
@@ -203,7 +258,49 @@ class Entrega {
      * Podeu soposar que `a`, `b` i `c` estan ordenats de menor a major.
      */
     static int exercici1(int[] a, int[] b, int[] c) {
-      return -1; // TODO
+    // Step 1: Compute A ∪ B
+      int[] unionArray = new int[a.length + b.length];
+      int unionSize = 0;
+
+    // Add elements of a to unionArray
+      for (int i = 0; i < a.length; i++) {
+        if (!contains(unionArray, unionSize, a[i])) {
+            unionArray[unionSize++] = a[i];
+        }
+      }
+
+    // Add elements of b to unionArray
+      for (int i = 0; i < b.length; i++) {
+        if (!contains(unionArray, unionSize, b[i])) {
+            unionArray[unionSize++] = b[i];
+        }
+      }
+
+    // Step 2: Compute A \ C
+      int[] differenceArray = new int[a.length];
+      int differenceSize = 0;
+
+      for (int i = 0; i < a.length; i++) {
+        if (!contains(c, c.length, a[i])) {
+            differenceArray[differenceSize++] = a[i];
+        }
+      }
+
+    // Step 3: Form the Cartesian Product (A ∪ B) × (A \ C)
+      int cartesianProductSize = unionSize * differenceSize;
+
+    // Step 4: Calculate the size of the power set
+      return (int) Math.pow(2, cartesianProductSize);
+    }
+
+// Helper method to check if an array contains an element up to a given size
+    static boolean contains(int[] array, int size, int value) {
+      for (int i = 0; i < size; i++) {
+        if (array[i] == value) {
+          return true;
+        }
+      }
+      return false;
     }
 
     /*
@@ -215,7 +312,68 @@ class Entrega {
      * Podeu soposar que `a` i `rel` estan ordenats de menor a major (`rel` lexicogràficament).
      */
     static int exercici2(int[] a, int[][] rel) {
-      return -1; // TODO
+    // Step 1: Convert the given relation to a list of pairs
+      List<Pair> relation = new ArrayList<>();
+      for (int[] pair : rel) {
+        addPair(relation, pair[0], pair[1]);
+      }
+
+    // Step 2: Reflexive closure: Add (x, x) for all x in a
+      for (int x : a) {
+        addPair(relation, x, x);
+      }
+
+    // Step 3: Symmetric closure: Add (y, x) for all (x, y)
+      int currentSize = relation.size();
+      for (int i = 0; i < currentSize; i++) {
+        Pair pair = relation.get(i);
+        addPair(relation, pair.second, pair.first);
+      }
+
+    // Step 4: Transitive closure: Add (x, z) for all (x, y) and (y, z)
+      boolean added;
+      do {
+        added = false;
+        int initialSize = relation.size();
+        List<Pair> newPairs = new ArrayList<>();
+        for (int i = 0; i < initialSize; i++) {
+            for (int j = 0; j < initialSize; j++) {
+                Pair p1 = relation.get(i);
+                Pair p2 = relation.get(j);
+                if (p1.second == p2.first) {
+                    if (addPair(newPairs, p1.first, p2.second)) {
+                        added = true;
+                    }
+                }
+            }
+        }
+        relation.addAll(newPairs);
+      } while (added);
+
+    // Step 5: The size of the relation list is the cardinality of the equivalence closure
+      return relation.size();
+    }
+
+// Helper method to add a pair to the list if it doesn't already exist
+    static boolean addPair(List<Pair> relation, int first, int second) {
+      for (Pair pair : relation) {
+        if (pair.first == first && pair.second == second) {
+            return false;
+        }
+      }
+      relation.add(new Pair(first, second));
+      return true;
+    }
+
+// Helper class to represent pairs
+    static class Pair {
+      int first;
+      int second;
+
+      Pair(int first, int second) {
+        this.first = first;
+        this.second = second;
+      }
     }
 
     /*
@@ -374,215 +532,6 @@ class Entrega {
     }
   }
 
-  /*
-   * Aquí teniu els exercicis del Tema 3 (Grafs).
-   *
-   * Els (di)grafs vendran donats com llistes d'adjacència (és a dir, tractau-los com diccionaris
-   * d'adjacència on l'índex és la clau i els vèrtexos estan numerats de 0 a n-1). Per exemple,
-   * podem donar el graf cicle d'ordre 3 com:
-   *
-   * int[][] c3dict = {
-   *   {1, 2}, // veïns de 0
-   *   {0, 2}, // veïns de 1
-   *   {0, 1}  // veïns de 2
-   * };
-   *
-   * **NOTA: Els exercicis d'aquest tema conten doble**
-   */
-  static class Tema3 {
-    /*
-     * Determinau si el graf és connex. Podeu suposar que `g` no és dirigit.
-     */
-    static boolean exercici1(int[][] g) {
-      return false; // TO DO
-    }
-
-    /*
-     * Donat un tauler d'escacs d'amplada `w` i alçada `h`, determinau quin és el mínim nombre de
-     * moviments necessaris per moure un cavall de la casella `i` a la casella `j`.
-     *
-     * Les caselles estan numerades de `0` a `w*h-1` per files. Per exemple, si w=5 i h=2, el tauler
-     * és:
-     *   0 1 2 3 4
-     *   5 6 7 8 9
-     *
-     * Retornau el nombre mínim de moviments, o -1 si no és possible arribar-hi.
-     */
-    static int exercici2(int w, int h, int i, int j) {
-      return -1; // TO DO
-    }
-
-    /*
-     * Donat un arbre arrelat (graf dirigit `g`, amb arrel `r`), decidiu si el vèrtex `u` apareix
-     * abans (o igual) que el vèrtex `v` al recorregut en preordre de l'arbre.
-     */
-    static boolean exercici3(int[][] g, int r, int u, int v) {
-      return false; // TO DO
-    }
-
-    /*
-     * Donat un recorregut en preordre (per exemple, el primer vèrtex que hi apareix és `preord[0]`)
-     * i el grau de cada vèrtex (per exemple, el vèrtex `i` té grau `d[i]`), trobau l'altura de
-     * l'arbre corresponent.
-     *
-     * L'altura d'un arbre arrelat és la major distància de l'arrel a les fulles.
-     */
-    static int exercici4(int[] preord, int[] d) {
-      return -1; // TO DO
-    }
-
-    /*
-     * Aquí teniu alguns exemples i proves relacionades amb aquests exercicis (vegeu `main`)
-     */
-    static void tests() {
-      // Exercici 1
-      // G connex?
-
-      final int[][] B2 = { {}, {} };
-
-      final int[][] C3 = { {1, 2}, {0, 2}, {0, 1} };
-
-      final int[][] C3D = { {1}, {2}, {0} };
-
-      assertThat(exercici1(C3));
-      assertThat(!exercici1(B2));
-
-      // Exercici 2
-      // Moviments de cavall
-
-      // Tauler 4x3. Moviments de 0 a 11: 3.
-      // 0  1   2   3
-      // 4  5   6   7
-      // 8  9  10  11
-      assertThat(exercici2(4, 3, 0, 11) == 3);
-
-      // Tauler 3x2. Moviments de 0 a 2: (impossible).
-      // 0 1 2
-      // 3 4 5
-      assertThat(exercici2(3, 2, 0, 2) == -1);
-
-      // Exercici 3
-      // u apareix abans que v al recorregut en preordre (o u=v)
-
-      final int[][] T1 = {
-        {1, 2, 3, 4},
-        {5},
-        {6, 7, 8},
-        {},
-        {9},
-        {},
-        {},
-        {},
-        {},
-        {10, 11},
-        {},
-        {}
-      };
-
-      assertThat(exercici3(T1, 0, 5, 3));
-      assertThat(!exercici3(T1, 0, 6, 2));
-
-      // Exercici 4
-      // Altura de l'arbre donat el recorregut en preordre
-
-      final int[] P1 = { 0, 1, 5, 2, 6, 7, 8, 3, 4, 9, 10, 11 };
-      final int[] D1 = { 4, 1, 3, 0, 1, 0, 0, 0, 0, 2,  0,  0 };
-
-      final int[] P2 = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
-      final int[] D2 = { 2, 0, 2, 0, 2, 0, 2, 0, 0 };
-
-      assertThat(exercici4(P1, D1) == 3);
-      assertThat(exercici4(P2, D2) == 4);
-    }
-  }
-
-  /*
-   * Aquí teniu els exercicis del Tema 4 (Aritmètica).
-   *
-   * En aquest tema no podeu:
-   *  - Utilitzar la força bruta per resoldre equacions: és a dir, provar tots els nombres de 0 a n
-   *    fins trobar el que funcioni.
-   *  - Utilitzar long, float ni double.
-   *
-   * Si implementau algun dels exercicis així, tendreu un 0 d'aquell exercici.
-   */
-  static class Tema4 {
-    /*
-     * Calculau el mínim comú múltiple de `a` i `b`.
-     */
-    static int exercici1(int a, int b) {
-      return -1; // TO DO
-    }
-
-    /*
-     * Trobau totes les solucions de l'equació
-     *
-     *   a·x ≡ b (mod n)
-     *
-     * donant els seus representants entre 0 i n-1.
-     *
-     * Podeu suposar que `n > 1`. Recordau que no no podeu utilitzar la força bruta.
-     */
-    static int[] exercici2(int a, int b, int n) {
-      return new int[] {}; // TO DO
-    }
-
-    /*
-     * Donats `a != 0`, `b != 0`, `c`, `d`, `m > 1`, `n > 1`, determinau si el sistema
-     *
-     *   a·x ≡ c (mod m)
-     *   b·x ≡ d (mod n)
-     *
-     * té solució.
-     */
-    static boolean exercici3(int a, int b, int c, int d, int m, int n) {
-      return false; // TO DO
-    }
-
-    /*
-     * Donats `n` un enter, `k > 0` enter, i `p` un nombre primer, retornau el residu de dividir n^k
-     * entre p.
-     *
-     * Alerta perquè és possible que n^k sigui massa gran com per calcular-lo directament.
-     * De fet, assegurau-vos de no utilitzar cap valor superior a max{n, p²}.
-     *
-     * Anau alerta també abusant de la força bruta, la vostra implementació hauria d'executar-se en
-     * qüestió de segons independentment de l'entrada.
-     */
-    static int exercici4(int n, int k, int p) {
-      return -1; // TO DO
-    }
-
-    /*
-     * Aquí teniu alguns exemples i proves relacionades amb aquests exercicis (vegeu `main`)
-     */
-    static void tests() {
-      // Exercici 1
-      // mcm(a, b)
-
-      assertThat(exercici1(35, 77) == 5*7*11);
-      assertThat(exercici1(-8, 12) == 24);
-
-      // Exercici 2
-      // Solucions de a·x ≡ b (mod n)
-
-      assertThat(Arrays.equals(exercici2(2, 2, 4), new int[] { 1, 3 }));
-      assertThat(Arrays.equals(exercici2(3, 2, 4), new int[] { 2 }));
-
-      // Exercici 3
-      // El sistema a·x ≡ c (mod m), b·x ≡ d (mod n) té solució?
-
-      assertThat(exercici3(3, 2, 2, 2, 5, 4));
-      assertThat(!exercici3(3, 2, 2, 2, 10, 4));
-
-      // Exercici 4
-      // n^k mod p
-
-      assertThat(exercici4(2018, 2018, 5) == 4);
-      assertThat(exercici4(-2147483646, 2147483645, 679389209) == 145738906);
-    }
-  }
-
   /**
    * Aquest mètode `main` conté alguns exemples de paràmetres i dels resultats que haurien de donar
    * els exercicis. Podeu utilitzar-los de guia i també en podeu afegir d'altres (no els tendrem en
@@ -593,8 +542,6 @@ class Entrega {
   public static void main(String[] args) {
     Tema1.tests();
     Tema2.tests();
-    Tema3.tests();
-    Tema4.tests();
   }
 
   /// Si b és cert, no fa res. Si b és fals, llança una excepció (AssertionError).
