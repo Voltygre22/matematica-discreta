@@ -383,8 +383,59 @@ class Entrega {
      * Podeu soposar que `a` i `rel` estan ordenats de menor a major (`rel` lexicogràficament).
      */
     static int exercici3(int[] a, int[][] rel) {
-      return -1; // TODO
+      int n = a.length;
+      boolean[][] relation = new boolean[n][n];
+      
+    // Fill the relation matrix
+      for (int[] pair : rel) {
+        relation[pair[0]][pair[1]] = true;
+      }
+
+    // Check reflexivity
+      for (int i = 0; i < n; i++) {
+        if (!relation[i][i]) return -2;
+      }
+
+    // Check antisymmetry and totality
+      for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+          if (i != j) {
+            if (relation[i][j] && relation[j][i]) return -2;
+            if (!relation[i][j] && !relation[j][i]) return -2;
+          }
+        }
+      }
+
+    // Check transitivity
+      for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+          for (int k = 0; k < n; k++) {
+            if (relation[i][j] && relation[j][k] && !relation[i][k]) return -2;
+          }
+        }
+      }
+
+    // Calculate Hasse diagram edges (remove reflexive and transitive edges)
+      int hasseEdges = 0;
+      for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+          if (i != j && relation[i][j]) {
+            boolean isTransitive = false;
+            for (int k = 0; k < n; k++) {
+              if (k != i && k != j && relation[i][k] && relation[k][j]) {
+                isTransitive = true;
+                break;
+              }
+            }
+            if (!isTransitive) {
+              hasseEdges++;
+            }
+          }
+        }
+      }
+      return hasseEdges;
     }
+
 
 
     /*
@@ -395,16 +446,114 @@ class Entrega {
      * lexicogràficament).
      */
     static int[][] exercici4(int[] a, int[][] rel1, int[][] rel2) {
-      return new int[][] {}; // TODO
+      int n = a.length;
+
+    // Check if rel1 is a function
+      boolean[] domainRel1 = new boolean[n];
+      for (int[] pair : rel1) {
+        int x = pair[0];
+        if (domainRel1[x]) return null; // rel1 is not a function
+        domainRel1[x] = true;
+      }
+
+    // Check if rel2 is a function
+      boolean[] domainRel2 = new boolean[n];
+      for (int[] pair : rel2) {
+        int x = pair[0];
+        if (domainRel2[x]) return null; // rel2 is not a function
+        domainRel2[x] = true;
+      }
+
+    // Calculate the composition rel2 ∘ rel1
+      ArrayList<int[]> composition = new ArrayList<>();
+      for (int[] pair1 : rel1) {
+        int x = pair1[0];
+        int y = pair1[1];
+        for (int[] pair2 : rel2) {
+            if (pair2[0] == y) {
+                int z = pair2[1];
+                composition.add(new int[]{x, z});
+            }
+        }
     }
+
+    // Convert composition to int[][]
+      int[][] result = new int[composition.size()][2];
+      for (int i = 0; i < composition.size(); i++) {
+        result[i] = composition.get(i);
+      }
+
+      return result;
+    }
+
 
     /*
      * Comprovau si la funció `f` amb domini `dom` i codomini `codom` té inversa. Si la té, retornau
      * el seu graf (el de l'inversa). Sino, retornau null.
      */
     static int[][] exercici5(int[] dom, int[] codom, Function<Integer, Integer> f) {
-      return new int[][] {}; // TODO
+      int n = dom.length;
+
+    // Create arrays to store function values and inverse mapping
+      int[] functionValues = new int[n];
+      int[] inverseMapping = new int[n];
+      boolean[] codomSet = new boolean[codom.length];
+
+    // Check if f is injective (one-to-one) and fill the functionValues array
+      for (int i = 0; i < n; i++) {
+        int x = dom[i];
+        int y = f.apply(x);
+
+        // Find index of y in codom
+        int yIndex = -1;
+        for (int j = 0; j < codom.length; j++) {
+            if (codom[j] == y) {
+                yIndex = j;
+                break;
+            }
+        }
+        if (yIndex == -1 || functionValues[yIndex] != 0) {
+            return null; // f is not injective or y not in codom
+        }
+
+        functionValues[yIndex] = x + 1; // Use x + 1 to avoid default 0 value conflict
     }
+
+    // Check if f is surjective (onto)
+      for (int i = 0; i < n; i++) {
+        int x = dom[i];
+        int y = f.apply(x);
+
+        // Find index of y in codom
+        int yIndex = -1;
+        for (int j = 0; j < codom.length; j++) {
+            if (codom[j] == y) {
+                yIndex = j;
+                break;
+            }
+        }
+       
+        if (yIndex == -1 || codomSet[yIndex]) {
+            return null; // f is not surjective or duplicate found
+        }
+
+        codomSet[yIndex] = true;
+        inverseMapping[yIndex] = x;
+    }
+
+    // f is bijective, construct the inverse function graph
+      int[][] inverseGraph = new int[n][2];
+      int index = 0;
+      for (int i = 0; i < codom.length; i++) {
+        if (functionValues[i] != 0) {
+            inverseGraph[index][0] = codom[i];
+            inverseGraph[index][1] = functionValues[i] - 1; // Adjust back to original value
+            index++;
+        }
+      }
+      return inverseGraph;
+    }
+
 
     /*
      * Aquí teniu alguns exemples i proves relacionades amb aquests exercicis (vegeu `main`)
@@ -496,13 +645,26 @@ class Entrega {
      *  resultat = {{0,1}, {1,0}, {2,2}}
      */
     static int[][] lexSorted(int[][] arr) {
-      if (arr == null)
-        return null;
+      if (arr == null) return null;
 
-      var arr2 = Arrays.copyOf(arr, arr.length);
-      Arrays.sort(arr2, Arrays::compare);
+    // Create a copy of the array to avoid mutating the original array
+      int[][] arr2 = Arrays.copyOf(arr, arr.length);
+
+    // Sort using a custom comparator
+      Arrays.sort(arr2, (a, b) -> {
+        // Compare each element lexicographically
+        for (int i = 0; i < Math.min(a.length, b.length); i++) {
+            if (a[i] != b[i]) {
+                return Integer.compare(a[i], b[i]);
+            }
+        }
+        // If all elements compared so far are equal, the shorter array should come first
+        return Integer.compare(a.length, b.length);
+      });
+
       return arr2;
     }
+
 
     /**
      * Genera un array int[][] amb els elements {a, b} (a de as, b de bs) que satisfàn pred.test(a, b)
@@ -512,25 +674,44 @@ class Entrega {
      *   pred = (a, b) -> a == b
      *   resultat = {{0,0}, {1,1}}
      */
+public class Main {
     static int[][] generateRel(int[] as, int[] bs, BiPredicate<Integer, Integer> pred) {
-      var rel = new ArrayList<int[]>();
+        ArrayList<int[]> rel = new ArrayList<>();
 
-      for (int a : as) {
-        for (int b : bs) {
-          if (pred.test(a, b)) {
-            rel.add(new int[] { a, b });
-          }
+        for (int a : as) {
+            for (int b : bs) {
+                if (pred.test(a, b)) {
+                    rel.add(new int[] { a, b });
+                }
+            }
         }
-      }
 
-      return rel.toArray(new int[][] {});
+        return rel.toArray(new int[rel.size()][]);
     }
 
     /// Especialització de generateRel per a = b
     static int[][] generateRel(int[] as, BiPredicate<Integer, Integer> pred) {
-      return generateRel(as, as, pred);
+        return generateRel(as, as, pred);
     }
-  }
+
+    public static void main(String[] args) {
+        int[] dom = {0, 1}; // Placeholder for as
+        int[] codom = {0, 1, 2}; // Placeholder for bs
+        BiPredicate<Integer, Integer> pred = (a, b) -> a == b;
+
+        // Test generateRel with two different arrays
+        int[][] result = generateRel(dom, codom, pred);
+        for (int[] pair : result) {
+            System.out.println("{" + pair[0] + ", " + pair[1] + "}");
+        }
+
+        // Test generateRel with specialization where a = b
+        int[][] resultSpecialized = generateRel(dom, pred);
+        for (int[] pair : resultSpecialized) {
+            System.out.println("{" + pair[0] + ", " + pair[1] + "}");
+        }
+    }
+}
 
   /**
    * Aquest mètode `main` conté alguns exemples de paràmetres i dels resultats que haurien de donar
