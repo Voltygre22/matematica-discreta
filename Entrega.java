@@ -71,29 +71,84 @@ class Entrega {
      * Vegeu el mètode Tema1.tests() per exemples.
      */
     static int exercici1(int n) {
-      return 0; // TODO
+    // Base case
+      if (n <= 1) return 0;
+
+    // There are 2^n combinations of p1, p2, ..., pn
+      int totalCombinations = (1 << n); // This is 2^n
+    
+    // The number of combinations where the last proposition pn is true is 2^(n-1)
+      int truePnCombinations = (1 << (n - 1)); // This is 2^(n-1)
+    
+    // Return the number of cases where the entire proposition is true
+      return totalCombinations - truePnCombinations;
     }
 
     /*
      * És cert que ∀x : P(x) -> ∃!y : Q(x,y) ?
      */
     static boolean exercici2(int[] universe, Predicate<Integer> p, BiPredicate<Integer, Integer> q) {
-      return false; // TODO
+      for (int x : universe) {
+        if (p.test(x)) { // If P(x) is true
+            int count = 0;
+            for (int y : universe) {
+                if (q.test(x, y)) {
+                    count++;
+                }
+            }
+            if (count != 1) { // There must be exactly one y such that Q(x, y) is true
+                return false;
+            }
+        }
     }
+    return true; // All elements satisfied the condition
 
     /*
      * És cert que ∃x : ∀y : Q(x, y) -> P(x) ?
      */
-    static boolean exercici3(int[] universe, Predicate<Integer> p, BiPredicate<Integer, Integer> q) {
-      return false; // TODO
-    }
+      static boolean exercici3(int[] universe, Predicate<Integer> p, BiPredicate<Integer, Integer> q) {
+        for (int x : universe) {
+          boolean validForAllY = true;
+          for (int y : universe) {
+            if (q.test(x, y) && !p.test(x)) {
+                validForAllY = false;
+                break;
+            }
+          }
+          if (validForAllY) {
+            return true;
+          }
+        }
+        return false;
+      }
 
     /*
      * És cert que ∃x : ∃!y : ∀z : P(x,z) <-> Q(y,z) ?
      */
-    static boolean exercici4(int[] universe, BiPredicate<Integer, Integer> p, BiPredicate<Integer, Integer> q) {
-      return false; // TODO
+  static boolean exercici4(int[] universe, BiPredicate<Integer, Integer> p, BiPredicate<Integer, Integer> q) {
+    for (int x : universe) {
+        int validYCount = 0;
+        for (int y : universe) {
+            boolean validForAllZ = true;
+            for (int z : universe) {
+                if (p.test(x, z) != q.test(y, z)) {
+                    validForAllZ = false;
+                    break;
+                }
+            }
+            if (validForAllZ) {
+                validYCount++;
+                if (validYCount > 1) {
+                    break;
+                }
+            }
+        }
+        if (validYCount == 1) {
+            return true;
+        }
     }
+    return false;
+}
 
     /*
      * Aquí teniu alguns exemples i proves relacionades amb aquests exercicis (vegeu `main`)
@@ -203,7 +258,49 @@ class Entrega {
      * Podeu soposar que `a`, `b` i `c` estan ordenats de menor a major.
      */
     static int exercici1(int[] a, int[] b, int[] c) {
-      return -1; // TODO
+    // Step 1: Compute A ∪ B
+      int[] unionArray = new int[a.length + b.length];
+      int unionSize = 0;
+
+    // Add elements of a to unionArray
+      for (int i = 0; i < a.length; i++) {
+        if (!contains(unionArray, unionSize, a[i])) {
+            unionArray[unionSize++] = a[i];
+        }
+      }
+
+    // Add elements of b to unionArray
+      for (int i = 0; i < b.length; i++) {
+        if (!contains(unionArray, unionSize, b[i])) {
+            unionArray[unionSize++] = b[i];
+        }
+      }
+
+    // Step 2: Compute A \ C
+      int[] differenceArray = new int[a.length];
+      int differenceSize = 0;
+
+      for (int i = 0; i < a.length; i++) {
+        if (!contains(c, c.length, a[i])) {
+            differenceArray[differenceSize++] = a[i];
+        }
+      }
+
+    // Step 3: Form the Cartesian Product (A ∪ B) × (A \ C)
+      int cartesianProductSize = unionSize * differenceSize;
+
+    // Step 4: Calculate the size of the power set
+      return (int) Math.pow(2, cartesianProductSize);
+    }
+
+// Helper method to check if an array contains an element up to a given size
+    static boolean contains(int[] array, int size, int value) {
+      for (int i = 0; i < size; i++) {
+        if (array[i] == value) {
+          return true;
+        }
+      }
+      return false;
     }
 
     /*
@@ -215,7 +312,68 @@ class Entrega {
      * Podeu soposar que `a` i `rel` estan ordenats de menor a major (`rel` lexicogràficament).
      */
     static int exercici2(int[] a, int[][] rel) {
-      return -1; // TODO
+    // Step 1: Convert the given relation to a list of pairs
+      List<Pair> relation = new ArrayList<>();
+      for (int[] pair : rel) {
+        addPair(relation, pair[0], pair[1]);
+      }
+
+    // Step 2: Reflexive closure: Add (x, x) for all x in a
+      for (int x : a) {
+        addPair(relation, x, x);
+      }
+
+    // Step 3: Symmetric closure: Add (y, x) for all (x, y)
+      int currentSize = relation.size();
+      for (int i = 0; i < currentSize; i++) {
+        Pair pair = relation.get(i);
+        addPair(relation, pair.second, pair.first);
+      }
+
+    // Step 4: Transitive closure: Add (x, z) for all (x, y) and (y, z)
+      boolean added;
+      do {
+        added = false;
+        int initialSize = relation.size();
+        List<Pair> newPairs = new ArrayList<>();
+        for (int i = 0; i < initialSize; i++) {
+            for (int j = 0; j < initialSize; j++) {
+                Pair p1 = relation.get(i);
+                Pair p2 = relation.get(j);
+                if (p1.second == p2.first) {
+                    if (addPair(newPairs, p1.first, p2.second)) {
+                        added = true;
+                    }
+                }
+            }
+        }
+        relation.addAll(newPairs);
+      } while (added);
+
+    // Step 5: The size of the relation list is the cardinality of the equivalence closure
+      return relation.size();
+    }
+
+// Helper method to add a pair to the list if it doesn't already exist
+    static boolean addPair(List<Pair> relation, int first, int second) {
+      for (Pair pair : relation) {
+        if (pair.first == first && pair.second == second) {
+            return false;
+        }
+      }
+      relation.add(new Pair(first, second));
+      return true;
+    }
+
+// Helper class to represent pairs
+    static class Pair {
+      int first;
+      int second;
+
+      Pair(int first, int second) {
+        this.first = first;
+        this.second = second;
+      }
     }
 
     /*
