@@ -718,7 +718,45 @@ class Entrega {
      * Determinau si el graf és connex. Podeu suposar que `g` no és dirigit.
      */
     static boolean exercici1(int[][] g) {
-      return false; // TO DO
+        int n = g.length;
+        if (n == 0) {
+            return true;
+        }
+
+        // Array to track visited nodes
+        boolean[] visited = new boolean[n];
+
+        // Start DFS from the first node
+        dfs(g, 0, visited);
+
+        // Check if all nodes were visited
+        for (boolean v : visited) {
+            if (!v) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Helper method to perform DFS
+    static void dfs(int[][] g, int node, boolean[] visited) {
+        visited[node] = true;
+
+        for (int neighbor : g[node]) {
+            if (!visited[neighbor]) {
+                dfs(g, neighbor, visited);
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        // Test cases
+        final int[][] B2 = { {}, {} };
+        final int[][] C3 = { {1, 2}, {0, 2}, {0, 1} };
+        final int[][] C3D = { {1}, {2}, {0} };
+
+        System.out.println(exercici1(C3));  // true
+        System.out.println(exercici1(B2));  // false
     }
 
     /*
@@ -732,9 +770,61 @@ class Entrega {
      *
      * Retornau el nombre mínim de moviments, o -1 si no és possible arribar-hi.
      */
+    public class KnightMoves {
+
+    static int[] knightMovesX = {-2, -1, 1, 2, 2, 1, -1, -2};
+    static int[] knightMovesY = {1, 2, 2, 1, -1, -2, -2, -1};
+
     static int exercici2(int w, int h, int i, int j) {
-      return -1; // TO DO
+        if (i == j) {
+            return 0;
+        }
+
+        // Convert linear indices to 2D coordinates
+        int startX = i % w;
+        int startY = i / w;
+        int endX = j % w;
+        int endY = j / w;
+
+        boolean[][] visited = new boolean[w][h];
+        Queue<int[]> queue = new LinkedList<>();
+        queue.add(new int[]{startX, startY, 0}); // {x, y, distance}
+
+        while (!queue.isEmpty()) {
+            int[] current = queue.poll();
+            int x = current[0];
+            int y = current[1];
+            int distance = current[2];
+
+            // Try all possible knight moves
+            for (int k = 0; k < 8; k++) {
+                int newX = x + knightMovesX[k];
+                int newY = y + knightMovesY[k];
+
+                if (newX == endX && newY == endY) {
+                    return distance + 1;
+                }
+
+                if (isValidMove(newX, newY, w, h) && !visited[newX][newY]) {
+                    visited[newX][newY] = true;
+                    queue.add(new int[]{newX, newY, distance + 1});
+                }
+            }
+        }
+
+        return -1; // If no valid path is found
     }
+
+    static boolean isValidMove(int x, int y, int w, int h) {
+        return x >= 0 && y >= 0 && x < w && y < h;
+    }
+
+    public static void main(String[] args) {
+        // Test cases
+        System.out.println(exercici2(4, 3, 0, 11));  // Output: 3
+        System.out.println(exercici2(3, 2, 0, 2));   // Output: -1
+    }
+}
 
     /*
      * Donat un arbre arrelat (graf dirigit `g`, amb arrel `r`), decidiu si el vèrtex `u` apareix
