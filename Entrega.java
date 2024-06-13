@@ -675,7 +675,6 @@ class Entrega {
      *   pred = (a, b) -> a == b
      *   resultat = {{0,0}, {1,1}}
      */
-public class Main {
     static int[][] generateRel(int[] as, int[] bs, BiPredicate<Integer, Integer> pred) {
         ArrayList<int[]> rel = new ArrayList<>();
 
@@ -712,7 +711,6 @@ public class Main {
             System.out.println("{" + pair[0] + ", " + pair[1] + "}");
         }
     }
-}
 
   /**
    * Aquest mètode `main` conté alguns exemples de paràmetres i dels resultats que haurien de donar
