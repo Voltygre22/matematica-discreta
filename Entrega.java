@@ -251,6 +251,7 @@ class Entrega {
    * codomini int[] b. En el cas de tenir un objecte de tipus Function<Integer, Integer>, per aplicar
    * f a x, és a dir, "f(x)" on x és d'A i el resultat f.apply(x) és de B, s'escriu f.apply(x).
    */
+  }
   static class Tema2 {
     /*
      * Calculau el nombre d'elements del conjunt de parts de (a u b) × (a \ c)
