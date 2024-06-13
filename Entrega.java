@@ -831,8 +831,52 @@ class Entrega {
      * abans (o igual) que el vèrtex `v` al recorregut en preordre de l'arbre.
      */
     static boolean exercici3(int[][] g, int r, int u, int v) {
-      return false; // TO DO
+        List<Integer> preorderList = new ArrayList<>();
+        boolean[] visited = new boolean[g.length];
+        preorderTraversal(g, r, visited, preorderList);
+        
+        int indexU = preorderList.indexOf(u);
+        int indexV = preorderList.indexOf(v);
+
+        return indexU <= indexV;
     }
+
+    // Helper method to perform preorder traversal
+    static void preorderTraversal(int[][] g, int node, boolean[] visited, List<Integer> preorderList) {
+        visited[node] = true;
+        preorderList.add(node);
+
+        for (int neighbor : g[node]) {
+            if (!visited[neighbor]) {
+                preorderTraversal(g, neighbor, visited, preorderList);
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        // Example tree
+        final int[][] T1 = {
+            {1, 2, 3, 4},
+            {5},
+            {6, 7, 8},
+            {},
+            {9},
+            {},
+            {},
+            {},
+            {},
+            {10, 11},
+            {},
+            {}
+        };
+
+        // Test cases
+        System.out.println(exercici3(T1, 0, 5, 3));  // Output: true
+        System.out.println(exercici3(T1, 0, 6, 2));  // Output: false
+    }
+}
+
+public class TreeHeight {
 
     /*
      * Donat un recorregut en preordre (per exemple, el primer vèrtex que hi apareix és `preord[0]`)
@@ -842,8 +886,39 @@ class Entrega {
      * L'altura d'un arbre arrelat és la major distància de l'arrel a les fulles.
      */
     static int exercici4(int[] preord, int[] d) {
-      return -1; // TO DO
+        if (preord.length == 0) return 0;
+
+        int maxDepth = 0;
+        int currentDepth = 0;
+        Stack<Integer> stack = new Stack<>();
+
+        for (int i = 0; i < preord.length; i++) {
+            while (stack.size() > currentDepth) {
+                stack.pop();
+            }
+
+            stack.push(preord[i]);
+            maxDepth = Math.max(maxDepth, currentDepth);
+
+            currentDepth += d[preord[i]];
+            currentDepth = stack.size();
+        }
+
+        return maxDepth;
     }
+
+    public static void main(String[] args) {
+        // Test cases
+        final int[] P1 = {0, 1, 5, 2, 6, 7, 8, 3, 4, 9, 10, 11};
+        final int[] D1 = {4, 1, 3, 0, 1, 0, 0, 0, 0, 2, 0, 0};
+
+        final int[] P2 = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+        final int[] D2 = {2, 0, 2, 0, 2, 0, 2, 0, 0};
+
+        System.out.println(exercici4(P1, D1));  // Output: 3
+        System.out.println(exercici4(P2, D2));  // Output: 4
+    }
+}
 
     /*
      * Aquí teniu alguns exemples i proves relacionades amb aquests exercicis (vegeu `main`)
