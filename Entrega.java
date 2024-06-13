@@ -693,6 +693,7 @@ class Entrega {
     static int[][] generateRel(int[] as, BiPredicate<Integer, Integer> pred) {
         return generateRel(as, as, pred);
     }
+  }
 
     public static void main(String[] args) {
         int[] dom = {0, 1}; // Placeholder for as
