@@ -713,6 +713,201 @@ class Entrega {
     }
   }
 
+    static class Tema3 {
+      /*
+     * Determinau si el graf és connex. Podeu suposar que `g` no és dirigit.
+     */
+    static boolean exercici1(int[][] g) {
+      return false; // TO DO
+    }
+
+    /*
+     * Donat un tauler d'escacs d'amplada `w` i alçada `h`, determinau quin és el mínim nombre de
+     * moviments necessaris per moure un cavall de la casella `i` a la casella `j`.
+     *
+     * Les caselles estan numerades de `0` a `w*h-1` per files. Per exemple, si w=5 i h=2, el tauler
+     * és:
+     *   0 1 2 3 4
+     *   5 6 7 8 9
+     *
+     * Retornau el nombre mínim de moviments, o -1 si no és possible arribar-hi.
+     */
+    static int exercici2(int w, int h, int i, int j) {
+      return -1; // TO DO
+    }
+
+    /*
+     * Donat un arbre arrelat (graf dirigit `g`, amb arrel `r`), decidiu si el vèrtex `u` apareix
+     * abans (o igual) que el vèrtex `v` al recorregut en preordre de l'arbre.
+     */
+    static boolean exercici3(int[][] g, int r, int u, int v) {
+      return false; // TO DO
+    }
+
+    /*
+     * Donat un recorregut en preordre (per exemple, el primer vèrtex que hi apareix és `preord[0]`)
+     * i el grau de cada vèrtex (per exemple, el vèrtex `i` té grau `d[i]`), trobau l'altura de
+     * l'arbre corresponent.
+     *
+     * L'altura d'un arbre arrelat és la major distància de l'arrel a les fulles.
+     */
+    static int exercici4(int[] preord, int[] d) {
+      return -1; // TO DO
+    }
+
+    /*
+     * Aquí teniu alguns exemples i proves relacionades amb aquests exercicis (vegeu `main`)
+     */
+    static void tests() {
+      // Exercici 1
+      // G connex?
+
+      final int[][] B2 = { {}, {} };
+
+      final int[][] C3 = { {1, 2}, {0, 2}, {0, 1} };
+
+      final int[][] C3D = { {1}, {2}, {0} };
+
+      assertThat(exercici1(C3));
+      assertThat(!exercici1(B2));
+
+      // Exercici 2
+      // Moviments de cavall
+
+      // Tauler 4x3. Moviments de 0 a 11: 3.
+      // 0  1   2   3
+      // 4  5   6   7
+      // 8  9  10  11
+      assertThat(exercici2(4, 3, 0, 11) == 3);
+
+      // Tauler 3x2. Moviments de 0 a 2: (impossible).
+      // 0 1 2
+      // 3 4 5
+      assertThat(exercici2(3, 2, 0, 2) == -1);
+
+      // Exercici 3
+      // u apareix abans que v al recorregut en preordre (o u=v)
+
+      final int[][] T1 = {
+        {1, 2, 3, 4},
+        {5},
+        {6, 7, 8},
+        {},
+        {9},
+        {},
+        {},
+        {},
+        {},
+        {10, 11},
+        {},
+        {}
+      };
+
+      assertThat(exercici3(T1, 0, 5, 3));
+      assertThat(!exercici3(T1, 0, 6, 2));
+
+      // Exercici 4
+      // Altura de l'arbre donat el recorregut en preordre
+
+      final int[] P1 = { 0, 1, 5, 2, 6, 7, 8, 3, 4, 9, 10, 11 };
+      final int[] D1 = { 4, 1, 3, 0, 1, 0, 0, 0, 0, 2,  0,  0 };
+
+      final int[] P2 = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+      final int[] D2 = { 2, 0, 2, 0, 2, 0, 2, 0, 0 };
+
+      assertThat(exercici4(P1, D1) == 3);
+      assertThat(exercici4(P2, D2) == 4);
+    }
+  }
+  }
+
+  /*
+   * Aquí teniu els exercicis del Tema 4 (Aritmètica).
+   *
+   * En aquest tema no podeu:
+   *  - Utilitzar la força bruta per resoldre equacions: és a dir, provar tots els nombres de 0 a n
+   *    fins trobar el que funcioni.
+   *  - Utilitzar long, float ni double.
+   *
+   * Si implementau algun dels exercicis així, tendreu un 0 d'aquell exercici.
+   */
+  static class Tema4 {
+    /*
+     * Calculau el mínim comú múltiple de `a` i `b`.
+     */
+    static int exercici1(int a, int b) {
+      return -1; // TO DO
+    }
+
+    /*
+     * Trobau totes les solucions de l'equació
+     *
+     *   a·x ≡ b (mod n)
+     *
+     * donant els seus representants entre 0 i n-1.
+     *
+     * Podeu suposar que `n > 1`. Recordau que no no podeu utilitzar la força bruta.
+     */
+    static int[] exercici2(int a, int b, int n) {
+      return new int[] {}; // TO DO
+    }
+
+    /*
+     * Donats `a != 0`, `b != 0`, `c`, `d`, `m > 1`, `n > 1`, determinau si el sistema
+     *
+     *   a·x ≡ c (mod m)
+     *   b·x ≡ d (mod n)
+     *
+     * té solució.
+     */
+    static boolean exercici3(int a, int b, int c, int d, int m, int n) {
+      return false; // TO DO
+    }
+
+    /*
+     * Donats `n` un enter, `k > 0` enter, i `p` un nombre primer, retornau el residu de dividir n^k
+     * entre p.
+     *
+     * Alerta perquè és possible que n^k sigui massa gran com per calcular-lo directament.
+     * De fet, assegurau-vos de no utilitzar cap valor superior a max{n, p²}.
+     *
+     * Anau alerta també abusant de la força bruta, la vostra implementació hauria d'executar-se en
+     * qüestió de segons independentment de l'entrada.
+     */
+    static int exercici4(int n, int k, int p) {
+      return -1; // TO DO
+    }
+
+    /*
+     * Aquí teniu alguns exemples i proves relacionades amb aquests exercicis (vegeu `main`)
+     */
+    static void tests() {
+      // Exercici 1
+      // mcm(a, b)
+
+      assertThat(exercici1(35, 77) == 5*7*11);
+      assertThat(exercici1(-8, 12) == 24);
+
+      // Exercici 2
+      // Solucions de a·x ≡ b (mod n)
+
+      assertThat(Arrays.equals(exercici2(2, 2, 4), new int[] { 1, 3 }));
+      assertThat(Arrays.equals(exercici2(3, 2, 4), new int[] { 2 }));
+
+      // Exercici 3
+      // El sistema a·x ≡ c (mod m), b·x ≡ d (mod n) té solució?
+
+      assertThat(exercici3(3, 2, 2, 2, 5, 4));
+      assertThat(!exercici3(3, 2, 2, 2, 10, 4));
+
+      // Exercici 4
+      // n^k mod p
+
+      assertThat(exercici4(2018, 2018, 5) == 4);
+      assertThat(exercici4(-2147483646, 2147483645, 46337) == 7435);
+    }
+  }
+
   /**
    * Aquest mètode `main` conté alguns exemples de paràmetres i dels resultats que haurien de donar
    * els exercicis. Podeu utilitzar-los de guia i també en podeu afegir d'altres (no els tendrem en
@@ -723,6 +918,8 @@ class Entrega {
   public static void main(String[] args) {
     Tema1.tests();
     Tema2.tests();
+    Tema3.tests();
+    Tema4.tests();
   }
 
   /// Si b és cert, no fa res. Si b és fals, llança una excepció (AssertionError).
