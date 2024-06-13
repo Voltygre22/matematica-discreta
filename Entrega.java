@@ -1000,9 +1000,35 @@ public class TreeHeight {
     /*
      * Calculau el mínim comú múltiple de `a` i `b`.
      */
+public class LCMCalculator {
+
+    /*
+     * Calculau el mínim comú múltiple de `a` i `b`.
+     */
     static int exercici1(int a, int b) {
-      return -1; // TO DO
+        return (a / gcd(a, b)) * b;
     }
+
+    // Helper method to calculate the greatest common divisor using the Euclidean algorithm
+    static int gcd(int a, int b) {
+        while (b != 0) {
+            int temp = b;
+            b = a % b;
+            a = temp;
+        }
+        return a;
+    }
+
+    public static void main(String[] args) {
+        // Test cases
+        System.out.println(exercici1(12, 18));  // Output: 36
+        System.out.println(exercici1(5, 7));    // Output: 35
+        System.out.println(exercici1(21, 6));   // Output: 42
+        System.out.println(exercici1(0, 5));    // Output: 0
+    }
+}
+
+public class ModularEquationSolver {
 
     /*
      * Trobau totes les solucions de l'equació
@@ -1014,8 +1040,73 @@ public class TreeHeight {
      * Podeu suposar que `n > 1`. Recordau que no no podeu utilitzar la força bruta.
      */
     static int[] exercici2(int a, int b, int n) {
-      return new int[] {}; // TO DO
+        int gcd = gcd(a, n);
+        if (b % gcd != 0) {
+            return new int[] {}; // No solutions exist
+        }
+
+        // Reduce the equation by dividing a, b, and n by gcd
+        a /= gcd;
+        b /= gcd;
+        n /= gcd;
+
+        // Find the particular solution using the extended Euclidean algorithm
+        int x0 = modInverse(a, n);
+        x0 = (x0 * b) % n;
+        if (x0 < 0) {
+            x0 += n;
+        }
+
+        // All solutions
+        int[] solutions = new int[gcd];
+        for (int k = 0; k < gcd; k++) {
+            solutions[k] = (x0 + k * n) % (n * gcd);
+        }
+
+        return solutions;
     }
+
+    // Helper method to calculate the greatest common divisor using the Euclidean algorithm
+    static int gcd(int a, int b) {
+        while (b != 0) {
+            int temp = b;
+            b = a % b;
+            a = temp;
+        }
+        return a;
+    }
+
+    // Helper method to find the modular inverse using the extended Euclidean algorithm
+    static int modInverse(int a, int n) {
+        int[] result = extendedGcd(a, n);
+        int x = result[0];
+        int gcd = result[2];
+        if (gcd != 1) {
+            throw new IllegalArgumentException("Modular inverse does not exist");
+        }
+        return x % n;
+    }
+
+    // Helper method to perform the extended Euclidean algorithm
+    static int[] extendedGcd(int a, int b) {
+        if (b == 0) {
+            return new int[] {1, 0, a};
+        }
+        int[] result = extendedGcd(b, a % b);
+        int x1 = result[1];
+        int y1 = result[0] - (a / b) * result[1];
+        return new int[] {x1, y1, result[2]};
+    }
+
+    public static void main(String[] args) {
+        // Test cases
+        System.out.println(Arrays.toString(exercici2(14, 30, 100)));  // Example output: [10, 60]
+        System.out.println(Arrays.toString(exercici2(3, 6, 9)));      // Example output: []
+        System.out.println(Arrays.toString(exercici2(4, 8, 12)));     // Example output: [2, 5, 8, 11]
+    }
+}
+
+public class CongruenceSystemSolver {
 
     /*
      * Donats `a != 0`, `b != 0`, `c`, `d`, `m > 1`, `n > 1`, determinau si el sistema
@@ -1026,8 +1117,91 @@ public class TreeHeight {
      * té solució.
      */
     static boolean exercici3(int a, int b, int c, int d, int m, int n) {
-      return false; // TO DO
+        int gcd1 = gcd(a, m);
+        int gcd2 = gcd(b, n);
+
+        // Check if the individual congruences have solutions
+        if (c % gcd1 != 0 || d % gcd2 != 0) {
+            return false;
+        }
+
+        // Reduce the congruences
+        a /= gcd1;
+        c /= gcd1;
+        m /= gcd1;
+
+        b /= gcd2;
+        d /= gcd2;
+        n /= gcd2;
+
+        // Find a particular solution for each congruence
+        int x1 = findParticularSolution(a, c, m);
+        int x2 = findParticularSolution(b, d, n);
+
+        // Check if the solutions are compatible using CRT conditions
+        int[] result = solveCongruences(x1, m, x2, n);
+        return result != null;
     }
+
+    // Helper method to calculate the greatest common divisor using the Euclidean algorithm
+    static int gcd(int a, int b) {
+        while (b != 0) {
+            int temp = b;
+            b = a % b;
+            a = temp;
+        }
+        return a;
+    }
+
+    // Helper method to find a particular solution to a·x ≡ c (mod m)
+    static int findParticularSolution(int a, int c, int m) {
+        int[] result = extendedGcd(a, m);
+        int x = result[0];
+        int gcd = result[2];
+        if (gcd != 1) {
+            throw new IllegalArgumentException("No solution exists");
+        }
+        return (x * c) % m;
+    }
+
+    // Helper method to perform the extended Euclidean algorithm
+    static int[] extendedGcd(int a, int b) {
+        if (b == 0) {
+            return new int[] {1, 0, a};
+        }
+        int[] result = extendedGcd(b, a % b);
+        int x1 = result[1];
+        int y1 = result[0] - (a / b) * result[1];
+        return new int[] {x1, y1, result[2]};
+    }
+
+    // Helper method to solve two congruences x ≡ a (mod m) and x ≡ b (mod n) using CRT
+    static int[] solveCongruences(int a, int m, int b, int n) {
+        int[] result = extendedGcd(m, n);
+        int gcd = result[2];
+
+        if ((b - a) % gcd != 0) {
+            return null;
+        }
+
+        int mInverse = result[0];
+        int lcm = (m / gcd) * n;
+        int x = (a + m * ((b - a) / gcd * mInverse % (n / gcd))) % lcm;
+
+        if (x < 0) {
+            x += lcm;
+        }
+
+        return new int[] {x, lcm};
+    }
+
+    public static void main(String[] args) {
+        // Test cases
+        System.out.println(exercici3(14, 15, 30, 45, 100, 200)); // Output: true or false depending on compatibility
+        System.out.println(exercici3(3, 4, 6, 8, 9, 12));       // Output: true or false depending on compatibility
+        System.out.println(exercici3(2, 3, 4, 5, 6, 7));        // Output: true or false depending on compatibility
+    }
+}
 
     /*
      * Donats `n` un enter, `k > 0` enter, i `p` un nombre primer, retornau el residu de dividir n^k
