@@ -693,7 +693,6 @@ class Entrega {
     static int[][] generateRel(int[] as, BiPredicate<Integer, Integer> pred) {
         return generateRel(as, as, pred);
     }
-  }
 
     public static void main(String[] args) {
         int[] dom = {0, 1}; // Placeholder for as
@@ -712,6 +711,7 @@ class Entrega {
             System.out.println("{" + pair[0] + ", " + pair[1] + "}");
         }
     }
+  }
 
   /**
    * Aquest mètode `main` conté alguns exemples de paràmetres i dels resultats que haurien de donar
