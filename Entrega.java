@@ -1213,9 +1213,27 @@ public class CongruenceSystemSolver {
      * Anau alerta també abusant de la força bruta, la vostra implementació hauria d'executar-se en
      * qüestió de segons independentment de l'entrada.
      */
-    static int exercici4(int n, int k, int p) {
-      return -1; // TO DO
+static int exercici4(int n, int k, int p) {
+    // Funció per calcular la potència modular
+    long modPow(long base, int exp, int mod) {
+        long result = 1;
+        base = base % mod; // Assegurem que la base sigui menor que mod
+
+        while (exp > 0) {
+            // Si l'exponent és imparell, multipliquem la base amb el resultat
+            if ((exp & 1) == 1) {
+                result = (result * base) % mod;
+            }
+            // L'exponent es divideix per 2
+            exp >>= 1;
+            // Multipliquem la base amb ella mateixa
+            base = (base * base) % mod;
+        }
+        return result;
     }
+
+    return (int) modPow(n, k, p);
+}
 
     /*
      * Aquí teniu alguns exemples i proves relacionades amb aquests exercicis (vegeu `main`)
